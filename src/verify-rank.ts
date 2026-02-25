@@ -5,8 +5,7 @@ import { MatchData } from './types/analysis';
 const baseData: MatchData = {
     homeTeam: "Home",
     awayTeam: "Away",
-    handicap: { opening: -0.5, live: -0.5 },
-    handicapOdds: { opening: 0.90, live: 0.90 },
+    handicap: [{ value: -0.5, homeOdd: 0.90, awayOdd: -0.90 }],
     stats: {
         home: { last5: ["D", "D", "D", "D", "D"], last5Home: ["D", "D", "D", "D", "D"], goals: { scored: 1, conceded: 1 } },
         away: { last5: ["D", "D", "D", "D", "D"], last5Away: ["D", "D", "D", "D", "D"], goals: { scored: 1, conceded: 1 } }

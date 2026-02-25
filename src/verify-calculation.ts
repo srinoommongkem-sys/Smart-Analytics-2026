@@ -5,8 +5,7 @@ import { MatchData } from './types/analysis';
 const mockData: MatchData = {
     homeTeam: "Strong Attack",
     awayTeam: "Weak Defense",
-    handicap: { opening: -0.5, live: -0.75 }, // Favors home
-    handicapOdds: { opening: 0.90, live: 0.80 }, // Odds drop = money flow in
+    handicap: [{ value: -0.75, homeOdd: 0.80, awayOdd: -0.80 }], // Favors home
     stats: {
         home: {
             last5: ["W", "W", "W", "W", "W"],
@@ -20,7 +19,11 @@ const mockData: MatchData = {
         }
     },
     history: { h2h: ["W", "W", "W", "W", "W"] },
-    odds: { home: 1.5, draw: 4.0, away: 6.0 }
+    odds: { home: 1.5, draw: 4.0, away: 6.0 },
+    standings: {
+        home: { rank: 1, points: 60, goalDiff: 20 },
+        away: { rank: 18, points: 15, goalDiff: -20 }
+    }
 };
 
 const result = calculateAnalysis(mockData);

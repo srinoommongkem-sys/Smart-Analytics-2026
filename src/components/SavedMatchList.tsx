@@ -543,7 +543,7 @@ export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResu
                                                                             )}
                                                                             <span className={clsx(
                                                                                 "font-bold text-sm leading-tight line-clamp-1 px-1",
-                                                                                (match.originalData?.handicap?.[0]?.value || 0) < 0 ? "text-red-600" : "text-gray-900"
+                                                                                isHomeFavGrid ? "text-red-600" : "text-gray-900"
                                                                             )}>
                                                                                 {match.homeTeam}
                                                                             </span>
@@ -564,7 +564,7 @@ export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResu
                                                                             )}
                                                                             <span className={clsx(
                                                                                 "font-bold text-sm leading-tight line-clamp-1 px-1",
-                                                                                (match.originalData?.handicap?.[0]?.value || 0) > 0 ? "text-red-600" : "text-gray-900"
+                                                                                isAwayFavGrid ? "text-red-600" : "text-gray-900"
                                                                             )}>
                                                                                 {match.awayTeam}
                                                                             </span>

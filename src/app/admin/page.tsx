@@ -138,10 +138,22 @@ export default function AdminPage() {
         }
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         const newMatches = savedMatches.filter(m => m.id !== id);
         setSavedMatches(newMatches);
         localStorage.setItem("savedMatches", JSON.stringify(newMatches));
+
+        try {
+            await fetch('/api/delete-match', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id }),
+            });
+            // Don't need an alert, silent delete is fine since UI is immediately updated.
+        } catch (error) {
+            console.error("Failed to delete from server", error);
+            alert("Error deleting from server");
+        }
     };
 
     const handleUpdateResult = async (id: string, score: string) => {

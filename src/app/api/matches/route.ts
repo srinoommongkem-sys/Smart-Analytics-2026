@@ -9,13 +9,15 @@ export async function GET() {
         // Skip header row if it exists (assuming row 0 is header)
         // Check if rows exists and if the first row contains 'Home Team' or similar
         let dataRows = rows;
+        let rowOffset = 1; // Google Sheets is 1-indexed
         if (dataRows.length > 0 && String(dataRows[0][1]).toLowerCase().includes('home')) {
             dataRows = dataRows.slice(1);
+            rowOffset = 2; // Offset by 2 if there's a header row
         }
 
         const matches: AnalysisResult[] = dataRows.map((row: any[], index: number) => {
             return {
-                id: `sheet-${index}`, // fallback ID
+                id: `sheet-${index + rowOffset}`, // This precisely maps to the row number in Google Sheets
                 timestamp: new Date(row[0]).getTime() || Date.now(),
                 homeTeam: row[1] || "Unknown",
                 awayTeam: row[2] || "Unknown",
@@ -55,7 +57,8 @@ export async function GET() {
             }
         }
 
-        const validMatches = Array.from(matchMap.values());
+        // Exclude completely broken entries and entries marked as DELETED
+        const validMatches = Array.from(matchMap.values()).filter(m => m.resultStatus !== "DELETED");
 
         return NextResponse.json({ success: true, matches: validMatches });
     } catch (error) {

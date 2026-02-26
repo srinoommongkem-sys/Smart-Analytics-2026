@@ -74,6 +74,40 @@ export async function getMatchesFromSheet() {
     }
 }
 
+export async function deleteMatchFromSheet(rowNumber: number) {
+    try {
+        const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
+        const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+        const sheetId = process.env.GOOGLE_SHEET_ID;
+
+        if (!clientEmail || !privateKey || !sheetId) {
+            throw new Error("Missing Google Sheets credentials in .env");
+        }
+
+        const auth = new google.auth.GoogleAuth({
+            credentials: { client_email: clientEmail, private_key: privateKey },
+            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+        });
+
+        const sheets = google.sheets({ version: 'v4', auth });
+
+        // Update the Result Status column (Column S) for the specific row to 'DELETED'
+        const response = await sheets.spreadsheets.values.update({
+            spreadsheetId: sheetId,
+            range: `Sheet1!S${rowNumber}`,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: {
+                values: [['DELETED']],
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error("Delete Match Error:", error);
+        throw error;
+    }
+}
+
 export async function verifyPasscodeInSheet(passcode: string): Promise<boolean> {
     try {
         const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;

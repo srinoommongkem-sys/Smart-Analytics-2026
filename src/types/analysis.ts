@@ -84,6 +84,6 @@ export interface AnalysisResult {
         reason?: string;
     };
     originalData?: MatchData; // Store original input for editing
-    actualScore?: string; // e.g. "2-1"
-    resultStatus?: "WIN" | "LOSS" | "DRAW" | "HALF_WIN" | "HALF_LOSS" | "VOID";
+    actualScore?: string; // To store something like "2-1"
+    resultStatus?: 'WIN' | 'LOSS' | 'DRAW' | 'HALF_WIN' | 'HALF_LOSS' | 'VOID' | 'DELETED';
 }

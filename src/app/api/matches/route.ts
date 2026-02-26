@@ -18,7 +18,7 @@ export async function GET() {
         const matches: AnalysisResult[] = dataRows.map((row: any[], index: number) => {
             return {
                 id: `sheet-${index + rowOffset}`, // This precisely maps to the row number in Google Sheets
-                timestamp: new Date(row[0]).getTime() || Date.now(),
+                timestamp: new Date(`${row[0]} GMT+0700`).getTime() || Date.now(),
                 homeTeam: row[1] || "Unknown",
                 awayTeam: row[2] || "Unknown",
                 score: parseInt(row[3]) || 0,
@@ -38,7 +38,7 @@ export async function GET() {
                     handicap: row[14] || "",
                     odds: parseFloat(row[15]) || 0.9,
                 },
-                matchTime: row[16] ? new Date(row[16]).getTime() : undefined,
+                matchTime: row[16] ? new Date(`${row[16]} GMT+0700`).getTime() : undefined,
                 actualScore: row[17] || undefined,
                 resultStatus: row[18] || undefined,
                 oddsShift: 0,

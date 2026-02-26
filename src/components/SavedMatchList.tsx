@@ -579,7 +579,8 @@ export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResu
                                                                         return (
                                                                             <div className={clsx(
                                                                                 "mb-3 rounded-lg p-3 text-white shadow relative overflow-hidden",
-                                                                                isPickFav ? "bg-gradient-to-r from-red-600 to-rose-700" : "bg-gradient-to-r from-blue-600 to-indigo-700"
+                                                                                isLocked ? "bg-gradient-to-r from-gray-700 to-gray-900" :
+                                                                                    isPickFav ? "bg-gradient-to-r from-red-600 to-rose-700" : "bg-gradient-to-r from-blue-600 to-indigo-700"
                                                                             )}>
                                                                                 {isLocked ? (
                                                                                     <div className="flex flex-col items-center justify-center py-2 relative z-10">

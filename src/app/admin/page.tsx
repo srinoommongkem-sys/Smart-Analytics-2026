@@ -20,41 +20,41 @@ export default function AdminPage() {
     const [editingMatch, setEditingMatch] = useState<MatchData | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
 
-    // Load saved matches from localStorage on mount and sanitize
+    // Load matches from API (Google Sheets) on mount
     useEffect(() => {
-        const saved = localStorage.getItem("savedMatches");
-        if (saved) {
+        const fetchMatches = async () => {
             try {
-                const parsed = JSON.parse(saved);
-                // Backfill missing IDs and Handicap Scores if any (migration for old data)
-                const sanitized = parsed.map((m: any) => ({
-                    ...m,
-                    id: m.id || crypto.randomUUID(),
-                    timestamp: m.timestamp || Date.now(),
-                    // Migration: Ensure new fields exist
-                    oddsShift: m.oddsShift || 0,
-                    details: {
-                        ...m.details,
-                        oddsScore: m.details?.oddsScore || m.details?.priceScore || 50, // Fallback to old score or neutral
-                        handicapScore: m.details?.handicapScore || 0
-                    },
-                    // Migration: Ensure prediction exists
-                    prediction: m.prediction || {
-                        team: m.score >= 50 ? m.homeTeam : m.awayTeam,
-                        handicap: "0",
-                        odds: 0.90
-                    }
-                }));
-                setSavedMatches(sanitized);
-                // Update storage if we modified anything
-                if (JSON.stringify(parsed) !== JSON.stringify(sanitized)) {
-                    localStorage.setItem("savedMatches", JSON.stringify(sanitized));
+                const res = await fetch('/api/matches');
+                const data = await res.json();
+                if (data.success && data.matches) {
+                    setSavedMatches(data.matches.reverse());
                 }
-            } catch (e) {
-                console.error("Failed to parse saved matches", e);
-                localStorage.removeItem("savedMatches");
+            } catch (error) {
+                console.error("Failed to fetch matches from API", error);
+                const saved = localStorage.getItem("savedMatches");
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        const sanitized = parsed.map((m: any) => ({
+                            ...m,
+                            id: m.id || crypto.randomUUID(),
+                            timestamp: m.timestamp || Date.now(),
+                            oddsShift: m.oddsShift || 0,
+                            prediction: m.prediction || {
+                                team: m.score >= 50 ? m.homeTeam : m.awayTeam,
+                                handicap: "0",
+                                odds: 0.90
+                            }
+                        }));
+                        setSavedMatches(sanitized);
+                    } catch (e) {
+                        console.error("Failed to parse saved matches", e);
+                        localStorage.removeItem("savedMatches");
+                    }
+                }
             }
-        }
+        };
+        fetchMatches();
     }, []);
 
     const handleAnalyze = (data: MatchData) => {

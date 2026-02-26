@@ -44,11 +44,13 @@ export async function GET() {
             } as AnalysisResult;
         });
 
-        // Deduplicate matches based on homeTeam and awayTeam (taking the latest entry)
+        // Deduplicate matches based on homeTeam, awayTeam, and date
         const matchMap = new Map<string, AnalysisResult>();
         for (const match of matches) {
             if (match.homeTeam !== "Unknown" && match.awayTeam !== "Unknown") {
-                const key = `${match.homeTeam}-${match.awayTeam}`;
+                const d = new Date(match.matchTime || match.timestamp);
+                const dateKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                const key = `${match.homeTeam}-${match.awayTeam}-${dateKey}`;
                 matchMap.set(key, match); // The later row overwrites earlier rows
             }
         }

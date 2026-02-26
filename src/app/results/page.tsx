@@ -12,23 +12,37 @@ export default function ResultsPage() {
     const [settledMatches, setSettledMatches] = useState<AnalysisResult[]>([]);
 
     useEffect(() => {
-        // Load matches (copy logic from other pages, ideally this should be a hook or context)
-        const saved = localStorage.getItem("savedMatches");
-        if (saved) {
+        const fetchMatches = async () => {
             try {
-                const parsed = JSON.parse(saved);
-                // Filter only settled matches (those with a resultStatus)
-                const settled = parsed.filter((m: AnalysisResult) => m.resultStatus && m.resultStatus !== "VOID");
+                const res = await fetch('/api/matches');
+                const data = await res.json();
 
-                // Sort by date descending (newest first)
-                settled.sort((a: AnalysisResult, b: AnalysisResult) => b.timestamp - a.timestamp);
+                if (data.success && data.matches) {
+                    const settled = data.matches.filter((m: any) => m.resultStatus && m.resultStatus !== "VOID");
+                    settled.sort((a: AnalysisResult, b: AnalysisResult) => b.timestamp - a.timestamp);
 
-                setSavedMatches(parsed);
-                setSettledMatches(settled);
-            } catch (e) {
-                console.error("Failed to parse saved matches", e);
+                    setSavedMatches(data.matches);
+                    setSettledMatches(settled);
+                }
+            } catch (error) {
+                console.error("Failed to fetch matches from API, falling back to local storage", error);
+                const saved = localStorage.getItem("savedMatches");
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        const settled = parsed.filter((m: AnalysisResult) => m.resultStatus && m.resultStatus !== "VOID");
+                        settled.sort((a: AnalysisResult, b: AnalysisResult) => b.timestamp - a.timestamp);
+
+                        setSavedMatches(parsed);
+                        setSettledMatches(settled);
+                    } catch (e) {
+                        console.error("Failed to parse saved matches", e);
+                    }
+                }
             }
-        }
+        };
+
+        fetchMatches();
     }, []);
 
     return (

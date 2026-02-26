@@ -37,6 +37,43 @@ export async function appendToSheet(values: any[]) {
     }
 }
 
+export async function getMatchesFromSheet() {
+    try {
+        const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
+        const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+        const sheetId = process.env.GOOGLE_SHEET_ID;
+
+        if (!clientEmail || !privateKey || !sheetId) {
+            throw new Error("Missing Google Sheets credentials in .env");
+        }
+
+        const auth = new google.auth.GoogleAuth({
+            credentials: {
+                client_email: clientEmail,
+                private_key: privateKey,
+            },
+            scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+        });
+
+        const sheets = google.sheets({ version: 'v4', auth });
+
+        const response = await sheets.spreadsheets.values.get({
+            spreadsheetId: sheetId,
+            range: 'Sheet1!A:Z',
+        });
+
+        const rows = response.data.values || [];
+        if (rows.length === 0) return [];
+
+        // Assuming Row 1 is header, map rows to JSON
+        // Based on the append, we need to know the schema. Wait, `/api/save-match` appends the entire JSON as a string? Or columns?
+        return rows;
+    } catch (error) {
+        console.error("Get Matches Error:", error);
+        return [];
+    }
+}
+
 export async function verifyPasscodeInSheet(passcode: string): Promise<boolean> {
     try {
         const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;

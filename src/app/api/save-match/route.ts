@@ -5,7 +5,7 @@ import { appendToSheet } from '../../../lib/google-sheets';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { leagueName, homeTeam, awayTeam, homeTeamLogo, awayTeamLogo, score, recommendation, details, timestamp, prediction, matchDate, matchTime } = body;
+        const { leagueName, homeTeam, awayTeam, homeTeamLogo, awayTeamLogo, score, recommendation, details, timestamp, prediction, matchDate, matchTime, actualScore, resultStatus } = body;
 
         // Format data for Google Sheets (Row)
         const processDate = new Date(timestamp).toLocaleString('en-US', { timeZone: 'Asia/Bangkok' });
@@ -35,7 +35,9 @@ export async function POST(request: Request) {
             prediction?.team || "",      // Column N (Predicted Team)
             prediction?.handicap || "",  // Column O (Handicap)
             prediction?.odds || "",      // Column P (Odds)
-            scheduledTime || ""          // Column Q (Match Schedule)
+            scheduledTime || "",         // Column Q (Match Schedule)
+            actualScore || "",           // Column R (Actual Score)
+            resultStatus || ""           // Column S (Result Status)
         ];
 
         await appendToSheet(rowData);

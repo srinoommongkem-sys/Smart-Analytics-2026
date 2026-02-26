@@ -7,35 +7,34 @@ import { AnalysisResult } from "../types/analysis";
 export default function Home() {
     const [savedMatches, setSavedMatches] = useState<AnalysisResult[]>([]);
 
-    // Load saved matches from localStorage upon mount
+    // Load matches from API (Google Sheets) on mount
     useEffect(() => {
-        const saved = localStorage.getItem("savedMatches");
-        if (saved) {
+        const fetchMatches = async () => {
             try {
-                const parsed = JSON.parse(saved);
-                const sanitized = parsed.map((m: any) => ({
-                    ...m,
-                    id: m.id || crypto.randomUUID(),
-                    timestamp: m.timestamp || Date.now(),
-                    oddsShift: m.oddsShift || 0,
-                    details: {
-                        ...m.details,
-                        oddsScore: m.details?.oddsScore || m.details?.priceScore || 50,
-                        handicapScore: m.details?.handicapScore || 0
-                    },
-                    // Migration: Ensure prediction exists
-                    prediction: m.prediction || {
-                        team: m.score >= 50 ? m.homeTeam : m.awayTeam,
-                        handicap: "0",
-                        odds: 0.90
+                const res = await fetch('/api/matches');
+                const data = await res.json();
+
+                if (data.success && data.matches) {
+                    const activeMatches = data.matches.filter((m: any) => !m.resultStatus);
+                    // Reverse to show newest first if they are appended chronologically
+                    setSavedMatches(activeMatches.reverse());
+                }
+            } catch (error) {
+                console.error("Failed to fetch matches from API, falling back to local", error);
+                // Fallback to local storage if API fails
+                const saved = localStorage.getItem("savedMatches");
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        const activeMatches = parsed.filter((m: AnalysisResult) => !m.resultStatus);
+                        setSavedMatches(activeMatches);
+                    } catch (e) {
+                        console.error("Failed to parse local matches", e);
                     }
-                }));
-                const activeMatches = sanitized.filter((m: AnalysisResult) => !m.resultStatus);
-                setSavedMatches(activeMatches);
-            } catch (e) {
-                console.error("Failed to parse matches", e);
+                }
             }
-        }
+        };
+        fetchMatches();
     }, []);
 
     return (

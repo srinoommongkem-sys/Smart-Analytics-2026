@@ -290,8 +290,24 @@ export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResu
                                                             {leagueMatches.map((match: any) => {
                                                                 const isVIP = match.recommendation === "VIP";
                                                                 const isInvest = match.recommendation === "INVEST";
-                                                                const isHomeFav = (match.originalData?.handicap?.[0]?.value || 0) < 0;
-                                                                const isAwayFav = (match.originalData?.handicap?.[0]?.value || 0) > 0;
+                                                                let isHomeFav = false;
+                                                                let isAwayFav = false;
+
+                                                                if (match.originalData?.handicap) {
+                                                                    isHomeFav = (match.originalData.handicap[0]?.value || 0) < 0;
+                                                                    isAwayFav = (match.originalData.handicap[0]?.value || 0) > 0;
+                                                                } else if (match.prediction?.handicap) {
+                                                                    const isPredFav = match.prediction.handicap.trim().startsWith('-');
+                                                                    const isPredDog = match.prediction.handicap.trim().startsWith('+');
+                                                                    if (isPredFav) {
+                                                                        if (match.prediction.team === match.homeTeam) isHomeFav = true;
+                                                                        else if (match.prediction.team === match.awayTeam) isAwayFav = true;
+                                                                    } else if (isPredDog) {
+                                                                        if (match.prediction.team === match.homeTeam) isAwayFav = true;
+                                                                        else if (match.prediction.team === match.awayTeam) isHomeFav = true;
+                                                                    }
+                                                                }
+
                                                                 const isLocked = readOnly && !isUnlocked && match.id !== freeMatchId;
 
                                                                 return (
@@ -441,11 +457,26 @@ export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResu
                                                     {leagueMatches.map((match: any) => {
                                                         const isVIP = match.recommendation === "VIP";
                                                         const isInvest = match.recommendation === "INVEST";
-                                                        const isHomeFav = (match.originalData?.handicap?.[0]?.value || 0) <= 0;
-                                                        const isAwayFav = (match.originalData?.handicap?.[0]?.value || 0) > 0;
-                                                        // New consts for logic specific to grid if needed, or reuse above.
-                                                        const isHomeFavGrid = (match.originalData?.handicap?.[0]?.value || 0) < 0; // consistent with list
-                                                        const isAwayFavGrid = (match.originalData?.handicap?.[0]?.value || 0) > 0;
+                                                        let isHomeFav = false;
+                                                        let isAwayFav = false;
+
+                                                        if (match.originalData?.handicap) {
+                                                            isHomeFav = (match.originalData.handicap[0]?.value || 0) < 0;
+                                                            isAwayFav = (match.originalData.handicap[0]?.value || 0) > 0;
+                                                        } else if (match.prediction?.handicap) {
+                                                            const isPredFav = match.prediction.handicap.trim().startsWith('-');
+                                                            const isPredDog = match.prediction.handicap.trim().startsWith('+');
+                                                            if (isPredFav) {
+                                                                if (match.prediction.team === match.homeTeam) isHomeFav = true;
+                                                                else if (match.prediction.team === match.awayTeam) isAwayFav = true;
+                                                            } else if (isPredDog) {
+                                                                if (match.prediction.team === match.homeTeam) isAwayFav = true;
+                                                                else if (match.prediction.team === match.awayTeam) isHomeFav = true;
+                                                            }
+                                                        }
+
+                                                        const isHomeFavGrid = isHomeFav;
+                                                        const isAwayFavGrid = isAwayFav;
                                                         const isLocked = readOnly && !isUnlocked && match.id !== freeMatchId;
 
                                                         return (

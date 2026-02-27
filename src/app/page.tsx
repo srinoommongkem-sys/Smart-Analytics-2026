@@ -83,7 +83,7 @@ export default function Home() {
                         </div>
                     </div>
 
-                    <SavedMatchList matches={savedMatches} readOnly={true} />
+                    <SavedMatchList matches={savedMatches} readOnly={true} layout="list" />
                 </div>
 
                 {/* Footer */}

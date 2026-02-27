@@ -117,10 +117,10 @@ export const calculateAnalysis = (data: MatchData): AnalysisResult => {
         const goalDiff = expHomeGoals - expAwayGoals;
 
         // Map Goal Diff to Score
-        // +1 Goal Diff -> 65
-        // +2 Goal Diff -> 80
-        // -1 Goal Diff -> 35
-        goalScore = 50 + (goalDiff * 15);
+        // +1 Goal Diff -> 70
+        // +2 Goal Diff -> 90
+        // -1 Goal Diff -> 30
+        goalScore = 50 + (goalDiff * 20);
         if (goalScore > 100) goalScore = 100;
         if (goalScore < 0) goalScore = 0;
     }
@@ -211,9 +211,9 @@ export const calculateAnalysis = (data: MatchData): AnalysisResult => {
         }
     };
 
-    // 1. Class Score (20%): Valid if standings exist and are not empty zeros
+    // 1. Class Score (10%): Valid if standings exist and are not empty zeros
     const hasStandings = data.standings && (data.standings.home.rank !== 0 || data.standings.away.rank !== 0);
-    addScore(classScore, 0.20, hasStandings);
+    addScore(classScore, 0.10, hasStandings);
 
     // 2. Odds Score (REMOVED): Previously 10%, but caused massive regression to the mean (50).
     // The 10% has been redistributed to Stats and Goals for more decisive predictions.
@@ -230,9 +230,9 @@ export const calculateAnalysis = (data: MatchData): AnalysisResult => {
     const hasHistory = data.history.h2h.length > 0;
     addScore(historyScore, 0.10, hasHistory);
 
-    // 6. Handicap Score (20%): Valid if handicaps exist
+    // 6. Handicap Score (30%): Valid if handicaps exist
     const hasHandicap = handicaps.length > 0;
-    addScore(handicapScore, 0.20, hasHandicap);
+    addScore(handicapScore, 0.30, hasHandicap);
 
     // Calculate Final Score
     let finalBaseScore = 50;
@@ -246,8 +246,8 @@ export const calculateAnalysis = (data: MatchData): AnalysisResult => {
     // Direct Market Influence Bonus/Penalty
     // If Market (Handicap Score) is Strong (Safe), boost confidence.
     // If Market is Weak (Risk), lower confidence.
-    if (handicapScore >= 60) deviation += 5; // Safe Bonus
-    else if (handicapScore <= 40) deviation -= 5; // Risk Penalty
+    if (handicapScore >= 65) deviation += 10; // Safe Bonus
+    else if (handicapScore <= 35) deviation -= 10; // Risk Penalty
 
     const amplifiedScore = 50 + (deviation * 2.0); // Boosted Multiplier (2.0x)
 
@@ -284,27 +284,58 @@ export const calculateAnalysis = (data: MatchData): AnalysisResult => {
     if (handicaps.length > 0) {
         let bestLine = handicaps[0];
         let minDiff = Number.MAX_VALUE;
-        const targetOdds = 1.85; // Perfectly balanced for 1.70-1.95 range
+        let allTrapOdds = true; // Flag to check if every line is a trap
+
+        // 1. Confidence-Based Target Odds
+        // If VIP (High confidence): We target higher odds (1.95) to maximize profit
+        // If INVEST/WAIT (Lower confidence): We target lower odds (1.75) to play safer lines
+        const targetOdds = recommendation === "VIP" ? 1.95 : 1.75;
 
         handicaps.forEach(h => {
             // Skip zero lines if possible, unless it's the only one
             if (h.value === 0 && handicaps.length > 1) return;
 
             const oddToCheck = isHomePrediction ? h.homeOdd : h.awayOdd;
-            let diff = Math.abs(oddToCheck - targetOdds);
+            const absoluteHdp = isHomePrediction ? h.value : h.value * -1; // Negative implies favorite in backend mostly
+
+            let penalty = 0;
+
+            // 2. Trap Odds Avoidance
+            // If odds are > 2.05, it strongly indicates Trap Odds (too good to be true).
+            // Penalize heavily so it avoids this line.
+            if (oddToCheck > 2.05) {
+                penalty += 10.0;
+            } else {
+                allTrapOdds = false;
+            }
 
             // PENALTY: Avoid Low Water (< 1.70)
-            // If odds are below 1.70, we penalize the difference significantly.
-            // This makes a 2.05 (diff 0.20) preferable to a 1.65 (diff 0.20 + 1.0 = 1.20).
             if (oddToCheck < 1.70) {
-                diff += 1.0;
+                penalty += 1.0;
             }
+
+            // 3. Goal Score vs Handicap Filter
+            // If we are choosing a favorite line that gives away 1 or more goals (<= -1.0)
+            // BUT our attacking GoalScore is weak (< 60), we SHOULD NOT pick this line.
+            if (absoluteHdp <= -1.0 && goalScore < 60) {
+                penalty += 5.0;
+            }
+
+            let diff = Math.abs(oddToCheck - targetOdds) + penalty;
 
             if (diff < minDiff) {
                 minDiff = diff;
                 bestLine = h;
             }
         });
+
+        // Apply Risk Penalty if all choices were Trap Odds
+        if (allTrapOdds && handicaps.length > 0) {
+            // Demote recommendation to WAIT if it was INVEST due to high trap risk
+            if (recommendation === "INVEST") {
+                recommendation = "WAIT";
+            }
+        }
 
         const val = bestLine.value;
         if (isHomePrediction) {

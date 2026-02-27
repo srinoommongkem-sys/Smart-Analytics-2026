@@ -12,15 +12,18 @@ export default function StatsOverview({ matches }: StatsOverviewProps) {
     if (totalMatches === 0) return null;
 
     const wins = matches.filter(m => m.resultStatus === "WIN" || m.resultStatus === "HALF_WIN").length;
-    const losses = matches.filter(m => m.resultStatus === "LOSS").length;
+    const losses = matches.filter(m => m.resultStatus === "LOSS" || m.resultStatus === "HALF_LOSS").length;
     const halfLosses = matches.filter(m => m.resultStatus === "HALF_LOSS").length;
     const draws = matches.filter(m => m.resultStatus === "DRAW").length;
 
     // Calculate Win Rate: Win = 1 (HALF_WIN is already in wins)
-    const winRate = totalMatches > 0 ? (wins / totalMatches) * 100 : 0;
+    // Exclude DRAWs from the total matches for an accurate win rate
+    const validMatchesForWinRate = totalMatches - draws;
+    const winRate = validMatchesForWinRate > 0 ? (wins / validMatchesForWinRate) * 100 : 0;
 
     // Calculate "Net Score" (Win = +1, Loss = -1, HalfLoss = -0.5)
-    const netScore = wins - losses - (halfLosses * 0.5);
+    const fullLosses = matches.filter(m => m.resultStatus === "LOSS").length;
+    const netScore = wins - fullLosses - (halfLosses * 0.5);
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

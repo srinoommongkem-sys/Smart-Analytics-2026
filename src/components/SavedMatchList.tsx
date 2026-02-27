@@ -375,22 +375,26 @@ export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResu
                                                                         </td>
                                                                         <td className="py-3 px-4 align-middle relative">
                                                                             {match.prediction && (
-                                                                                <div className={clsx("flex flex-col gap-1 items-start justify-center min-w-[140px]", isLocked && "blur-sm opacity-50 select-none")}>
-                                                                                    <div className="flex items-center gap-1.5 font-bold text-xs text-blue-900">
-                                                                                        {(match.prediction.team === match.homeTeam ? match.homeTeamLogo : match.awayTeamLogo) && (
-                                                                                            <img src={match.prediction.team === match.homeTeam ? match.homeTeamLogo : match.awayTeamLogo} className="w-4 h-4 object-contain" />
-                                                                                        )}
-                                                                                        <span className="truncate max-w-[120px]">{match.prediction.team}</span>
-                                                                                    </div>
-                                                                                    <div className="flex items-center gap-2 text-[10px] text-gray-500">
-                                                                                        <span className="bg-blue-50 text-blue-700 px-1 rounded font-mono font-bold">HDP {match.prediction.handicap}</span>
-                                                                                        <span>@{match.prediction.odds.toFixed(2)}</span>
-                                                                                    </div>
-                                                                                </div>
-                                                                            )}
-                                                                            {isLocked && (
-                                                                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                                                    <span className="text-xl bg-white/70 rounded-full p-1 shadow-sm" title="VIP Only">🔒</span>
+                                                                                <div className="flex flex-col gap-1 items-start justify-center min-w-[140px]">
+                                                                                    {isLocked ? (
+                                                                                        <div className="flex flex-col items-center justify-center w-full bg-gray-50 py-2 rounded-lg border border-gray-100 mb-1">
+                                                                                            <span className="text-gray-400 text-lg mb-1">🔒</span>
+                                                                                            <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">VIP Only</span>
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <>
+                                                                                            <div className="flex items-center gap-1.5 font-bold text-xs text-blue-900">
+                                                                                                {(match.prediction.team === match.homeTeam ? match.homeTeamLogo : match.awayTeamLogo) && (
+                                                                                                    <img src={match.prediction.team === match.homeTeam ? match.homeTeamLogo : match.awayTeamLogo} className="w-4 h-4 object-contain" />
+                                                                                                )}
+                                                                                                <span className="truncate max-w-[120px]">{match.prediction.team}</span>
+                                                                                            </div>
+                                                                                            <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                                                                                                <span className="bg-blue-50 text-blue-700 px-1 rounded font-mono font-bold">HDP {match.prediction.handicap}</span>
+                                                                                                <span>@{match.prediction.odds.toFixed(2)}</span>
+                                                                                            </div>
+                                                                                        </>
+                                                                                    )}
                                                                                 </div>
                                                                             )}
                                                                         </td>

@@ -71,6 +71,7 @@ export default function ResultsPage() {
                         matches={settledMatches}
                         readOnly={true}
                         layout="list"
+                        defaultToYesterday={true}
                     />
                 </div>
             </div>

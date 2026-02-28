@@ -10,9 +10,10 @@ interface SavedMatchListProps {
     onUpdateResult?: (id: string, score: string) => void;
     readOnly?: boolean;
     layout?: "grid" | "list";
+    defaultToYesterday?: boolean;
 }
 
-export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResult, readOnly = false, layout = "grid" }: SavedMatchListProps) {
+export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResult, readOnly = false, layout = "grid", defaultToYesterday = false }: SavedMatchListProps) {
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
     const [selectedMatchForResult, setSelectedMatchForResult] = useState<AnalysisResult | null>(null);
 
@@ -60,10 +61,12 @@ export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResu
         }
     };
 
-    // Initialize date: Today (or yesterday if before 5:00 AM)
+    // Initialize date: Today (or yesterday if before 5:00 AM or defaultToYesterday is true)
     const [selectedDate, setSelectedDate] = useState<string>(() => {
         const d = new Date();
-        if (d.getHours() < 5) {
+        if (defaultToYesterday) {
+            d.setDate(d.getDate() - 1);
+        } else if (d.getHours() < 5) {
             d.setDate(d.getDate() - 1);
         }
         const year = d.getFullYear();

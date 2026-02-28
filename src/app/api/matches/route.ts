@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getMatchesFromSheet } from '../../../lib/google-sheets';
 import { AnalysisResult } from '../../../types/analysis';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         const rows = await getMatchesFromSheet();

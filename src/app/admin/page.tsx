@@ -231,7 +231,7 @@ export default function AdminPage() {
 
         try {
             const hashedInput = await hashPassword(passwordInput);
-            const targetHash = process.env.NEXT_PUBLIC_ADMIN_PASSWORD_HASH || "75a7c5ed24c0d0fe2ae6268041dfff481a8b9e6f"; // default: admin2026
+            const targetHash = process.env.NEXT_PUBLIC_ADMIN_PASSWORD_HASH || "56fd62af1fff4903459a265f02bbfff8b712e987"; // default: admin2026
 
             if (hashedInput === targetHash) {
                 setIsAuthenticated(true);

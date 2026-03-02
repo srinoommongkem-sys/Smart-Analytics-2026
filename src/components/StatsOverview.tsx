@@ -27,33 +27,35 @@ export default function StatsOverview({ matches }: StatsOverviewProps) {
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
-                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Matches</span>
-                <span className="text-3xl font-black text-gray-800">{totalMatches}</span>
+            <div className="bg-gradient-to-br from-blue-50 to-white p-5 rounded-3xl shadow-sm border border-blue-100/50 flex flex-col items-center justify-center relative overflow-hidden group">
+                <div className="absolute -right-4 -top-4 w-16 h-16 bg-blue-100/50 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500"></div>
+                <span className="text-blue-600/70 text-[10px] font-black uppercase tracking-widest mb-1 relative z-10">Total Matches</span>
+                <span className="text-4xl font-black text-blue-950 relative z-10">{totalMatches}</span>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
-                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Win Rate</span>
-                <span className={`text-3xl font-black ${winRate >= 50 ? 'text-green-500' : 'text-red-500'}`}>
+            <div className="bg-gradient-to-br from-green-50 to-white p-5 rounded-3xl shadow-sm border border-green-100/50 flex flex-col items-center justify-center relative overflow-hidden group">
+                <div className="absolute -right-4 -top-4 w-16 h-16 bg-green-100/50 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500"></div>
+                <span className="text-green-600/70 text-[10px] font-black uppercase tracking-widest mb-1 relative z-10">Win Rate</span>
+                <span className={`text-4xl font-black relative z-10 ${winRate >= 50 ? 'text-green-600' : 'text-red-500'}`}>
                     {winRate.toFixed(1)}%
                 </span>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
-                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Net Score</span>
-                <span className={`text-3xl font-black ${netScore > 0 ? 'text-green-600' : netScore < 0 ? 'text-red-600' : 'text-gray-600'}`}>
+            <div className="bg-gradient-to-br from-indigo-50 to-white p-5 rounded-3xl shadow-sm border border-indigo-100/50 flex flex-col items-center justify-center relative overflow-hidden group">
+                <div className="absolute -right-4 -top-4 w-16 h-16 bg-indigo-100/50 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500"></div>
+                <span className="text-indigo-600/70 text-[10px] font-black uppercase tracking-widest mb-1 relative z-10">Net Score</span>
+                <span className={`text-4xl font-black relative z-10 ${netScore > 0 ? 'text-indigo-600' : netScore < 0 ? 'text-rose-600' : 'text-gray-600'}`}>
                     {netScore > 0 ? '+' : ''}{netScore}
                 </span>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
-                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Record</span>
-                <div className="flex items-center gap-2 text-sm font-bold">
-                    <span className="text-green-600">{wins}W</span>
-                    <span className="text-gray-400">-</span>
-                    <span className="text-gray-500">{draws}D</span>
-                    <span className="text-gray-400">-</span>
-                    <span className="text-red-600">{losses}L</span>
+            <div className="bg-gradient-to-br from-purple-50 to-white p-5 rounded-3xl shadow-sm border border-purple-100/50 flex flex-col items-center justify-center relative overflow-hidden group">
+                <div className="absolute -right-4 -top-4 w-16 h-16 bg-purple-100/50 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500"></div>
+                <span className="text-purple-600/70 text-[10px] font-black uppercase tracking-widest mb-2 relative z-10">Record (W-D-L)</span>
+                <div className="flex items-center gap-2 text-base font-black relative z-10">
+                    <span className="text-green-600 bg-green-100/50 px-2 py-0.5 rounded-md">{wins}W</span>
+                    <span className="text-gray-400 bg-gray-100/50 px-2 py-0.5 rounded-md">{draws}D</span>
+                    <span className="text-red-600 bg-red-100/50 px-2 py-0.5 rounded-md">{losses}L</span>
                 </div>
             </div>
         </div>

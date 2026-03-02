@@ -20,6 +20,20 @@ export default function AdminPage() {
     const [editingMatch, setEditingMatch] = useState<MatchData | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
 
+    // Authentication State
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [passwordInput, setPasswordInput] = useState("");
+    const [isAuthenticating, setIsAuthenticating] = useState(false);
+    const [authError, setAuthError] = useState("");
+
+    // Check session storage for existing auth
+    useEffect(() => {
+        const auth = sessionStorage.getItem("admin_auth");
+        if (auth === "true") {
+            setIsAuthenticated(true);
+        }
+    }, []);
+
     // Load matches from API (Google Sheets) on mount
     useEffect(() => {
         const fetchMatches = async () => {
@@ -194,6 +208,90 @@ export default function AdminPage() {
             alert("Result Saved Locally Only ⚠️");
         }
     };
+
+    // SHA-1 Hashing Function
+    const hashPassword = async (password: string) => {
+        const msgUint8 = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest("SHA-1", msgUint8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    };
+
+    const handleLogin = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+
+        if (!passwordInput.trim()) {
+            setAuthError("กรุณาใส่รหัสผ่าน");
+            return;
+        }
+
+        setIsAuthenticating(true);
+        setAuthError("");
+
+        try {
+            const hashedInput = await hashPassword(passwordInput);
+            const targetHash = process.env.NEXT_PUBLIC_ADMIN_PASSWORD_HASH || "75a7c5ed24c0d0fe2ae6268041dfff481a8b9e6f"; // default: admin2026
+
+            if (hashedInput === targetHash) {
+                setIsAuthenticated(true);
+                sessionStorage.setItem("admin_auth", "true");
+            } else {
+                setAuthError("รหัสผ่านไม่ถูกต้อง");
+            }
+        } catch (error) {
+            console.error("Hashing error", error);
+            setAuthError("เกิดข้อผิดพลาดในการตรวจสอบรหัส");
+        } finally {
+            setIsAuthenticating(false);
+        }
+    };
+
+    if (!isAuthenticated) {
+        return (
+            <main className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+                <div className="bg-white p-8 rounded-3xl shadow-xl shadow-gray-200/50 max-w-md w-full border border-gray-100 relative overflow-hidden">
+                    <button
+                        onClick={() => router.push("/")}
+                        className="absolute top-4 left-4 text-gray-400 hover:text-gray-600 transition-colors"
+                        title="Back to Home"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                    </button>
+                    <div className="text-center mb-8 pt-4">
+                        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                            🔒
+                        </div>
+                        <h1 className="text-2xl font-black text-gray-900 tracking-tight">Admin System</h1>
+                        <p className="text-gray-500 text-sm mt-1">กรุณาเข้าสู่ระบบเพื่อใช้งาน</p>
+                    </div>
+
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <div>
+                            <input
+                                type="password"
+                                value={passwordInput}
+                                onChange={(e) => setPasswordInput(e.target.value)}
+                                placeholder="รหัสผ่านผู้ดูแลระบบ"
+                                className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-center text-lg font-bold outline-none focus:border-red-500 focus:bg-white transition-all shadow-inner"
+                                autoFocus
+                            />
+                        </div>
+                        {authError && (
+                            <p className="text-red-500 text-xs font-bold text-center mt-2 animate-bounce">{authError}</p>
+                        )}
+                        <button
+                            type="submit"
+                            disabled={isAuthenticating || !passwordInput.trim()}
+                            className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl shadow-lg shadow-red-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isAuthenticating ? "กำลังตรวจสอบ..." : "เข้าสู่ระบบ"}
+                        </button>
+                    </form>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className="min-h-screen bg-gray-50 p-4 md:p-8">

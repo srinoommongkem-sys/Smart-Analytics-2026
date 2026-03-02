@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import SavedMatchList from "../components/SavedMatchList";
+import StatsOverview from "../components/StatsOverview";
 import { AnalysisResult } from "../types/analysis";
 
 export default function Home() {
     const [savedMatches, setSavedMatches] = useState<AnalysisResult[]>([]);
+    const [settledMatches, setSettledMatches] = useState<AnalysisResult[]>([]);
 
     // Load matches from API (Google Sheets) on mount
     useEffect(() => {
@@ -16,8 +18,11 @@ export default function Home() {
 
                 if (data.success && data.matches) {
                     const activeMatches = data.matches.filter((m: any) => !m.resultStatus);
+                    const settled = data.matches.filter((m: any) => m.resultStatus && m.resultStatus !== "VOID");
+                    settled.sort((a: AnalysisResult, b: AnalysisResult) => b.timestamp - a.timestamp);
                     // Reverse to show newest first if they are appended chronologically
                     setSavedMatches(activeMatches.reverse());
+                    setSettledMatches(settled);
                 }
             } catch (error) {
                 console.error("Failed to fetch matches from API, falling back to local", error);
@@ -27,7 +32,10 @@ export default function Home() {
                     try {
                         const parsed = JSON.parse(saved);
                         const activeMatches = parsed.filter((m: AnalysisResult) => !m.resultStatus);
+                        const settled = parsed.filter((m: AnalysisResult) => m.resultStatus && m.resultStatus !== "VOID");
+                        settled.sort((a: AnalysisResult, b: AnalysisResult) => b.timestamp - a.timestamp);
                         setSavedMatches(activeMatches);
+                        setSettledMatches(settled);
                     } catch (e) {
                         console.error("Failed to parse local matches", e);
                     }
@@ -72,6 +80,11 @@ export default function Home() {
                         ยกระดับการลงทุนกีฬาฟุตบอล ด้วยเทคโนโลยี AI อัจฉริยะ <br />
                         ขับเคลื่อนด้วยอัลกอริทึมขั้นสูง เพื่อผลการวิเคราะห์ที่แม่นยำที่สุด
                     </p>
+                </div>
+
+                {/* Stats Overview */}
+                <div className="mb-12">
+                    <StatsOverview matches={settledMatches} />
                 </div>
 
                 {/* Content Section */}

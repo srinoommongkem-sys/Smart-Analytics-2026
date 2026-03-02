@@ -11,9 +11,10 @@ interface SavedMatchListProps {
     readOnly?: boolean;
     layout?: "grid" | "list";
     defaultToYesterday?: boolean;
+    hideConfidence?: boolean;
 }
 
-export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResult, readOnly = false, layout = "grid", defaultToYesterday = false }: SavedMatchListProps) {
+export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResult, readOnly = false, layout = "grid", defaultToYesterday = false, hideConfidence = false }: SavedMatchListProps) {
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
     const [selectedMatchForResult, setSelectedMatchForResult] = useState<AnalysisResult | null>(null);
 
@@ -285,7 +286,7 @@ export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResu
                                                                 <th className="py-3 px-4 w-24">Status</th>
                                                                 <th className="py-3 px-4">Match</th>
                                                                 <th className="py-3 px-4">Pick</th>
-                                                                <th className="py-3 px-4 text-center">Conf.</th>
+                                                                {!hideConfidence && <th className="py-3 px-4 text-center">Conf.</th>}
                                                                 {!readOnly && <th className="py-3 px-4 text-right">Actions</th>}
                                                             </tr>
                                                         </thead>
@@ -401,11 +402,13 @@ export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResu
                                                                                 </div>
                                                                             )}
                                                                         </td>
-                                                                        <td className="py-3 px-4 align-middle text-center relative">
-                                                                            <div className={clsx("font-black text-sm", isVIP ? "text-green-600" : isInvest ? "text-yellow-600" : "text-gray-600", isLocked && "blur-sm opacity-50 select-none")}>
-                                                                                {match.score}%
-                                                                            </div>
-                                                                        </td>
+                                                                        {!hideConfidence && (
+                                                                            <td className="py-3 px-4 align-middle text-center relative">
+                                                                                <div className={clsx("font-black text-sm", isVIP ? "text-green-600" : isInvest ? "text-yellow-600" : "text-gray-600", isLocked && "blur-sm opacity-50 select-none")}>
+                                                                                    {match.score}%
+                                                                                </div>
+                                                                            </td>
+                                                                        )}
                                                                         {!readOnly && (
                                                                             <td className="py-3 px-4 align-middle text-right">
                                                                                 <div className="flex items-center justify-end gap-2">
@@ -629,37 +632,39 @@ export default function SavedMatchList({ matches, onDelete, onEdit, onUpdateResu
                                                                         );
                                                                     })()}
 
-                                                                    <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-100 relative">
-                                                                        <div className={clsx("bg-gray-50 rounded-lg p-2 text-center", isLocked && "blur-sm opacity-50 select-none")}>
-                                                                            <div className="text-[10px] text-gray-400 mb-0.5 font-semibold">CONFIDENCE</div>
-                                                                            <div className={clsx(
-                                                                                "text-lg font-black",
-                                                                                isVIP ? "text-green-600" : isInvest ? "text-yellow-600" : "text-gray-500"
-                                                                            )}>
-                                                                                {match.score}%
+                                                                    {!hideConfidence && (
+                                                                        <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-100 relative">
+                                                                            <div className={clsx("bg-gray-50 rounded-lg p-2 text-center", isLocked && "blur-sm opacity-50 select-none")}>
+                                                                                <div className="text-[10px] text-gray-400 mb-0.5 font-semibold">CONFIDENCE</div>
+                                                                                <div className={clsx(
+                                                                                    "text-lg font-black",
+                                                                                    isVIP ? "text-green-600" : isInvest ? "text-yellow-600" : "text-gray-500"
+                                                                                )}>
+                                                                                    {match.score}%
+                                                                                </div>
                                                                             </div>
-                                                                        </div>
 
-                                                                        <div className={clsx("bg-gray-50 rounded-lg p-2 text-center", isLocked && "blur-sm opacity-50 select-none")}>
-                                                                            <div className="text-[10px] text-gray-400 mb-0.5 font-semibold">ความเชื่อมั่น</div>
-                                                                            <div className={clsx(
-                                                                                "text-xs font-bold font-mono uppercase mt-1",
-                                                                                match.details.handicapScore > 60 ? "text-green-600" :
-                                                                                    match.details.handicapScore < 40 ? "text-red-600" : "text-yellow-600"
-                                                                            )}>
-                                                                                {match.details.handicapScore > 60 ? "ปลอดภัย" :
-                                                                                    match.details.handicapScore < 40 ? "เสี่ยง" : "ทั่วไป"}
+                                                                            <div className={clsx("bg-gray-50 rounded-lg p-2 text-center", isLocked && "blur-sm opacity-50 select-none")}>
+                                                                                <div className="text-[10px] text-gray-400 mb-0.5 font-semibold">ความเชื่อมั่น</div>
+                                                                                <div className={clsx(
+                                                                                    "text-xs font-bold font-mono uppercase mt-1",
+                                                                                    match.details.handicapScore > 60 ? "text-green-600" :
+                                                                                        match.details.handicapScore < 40 ? "text-red-600" : "text-yellow-600"
+                                                                                )}>
+                                                                                    {match.details.handicapScore > 60 ? "ปลอดภัย" :
+                                                                                        match.details.handicapScore < 40 ? "เสี่ยง" : "ทั่วไป"}
+                                                                                </div>
                                                                             </div>
-                                                                        </div>
 
-                                                                        {isLocked && (
-                                                                            <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-                                                                                <span className="bg-white/80 text-gray-800 text-[10px] font-bold px-2 py-1 rounded shadow-sm flex items-center gap-1">
-                                                                                    <span>🔒</span> สงวนสิทธิ์
-                                                                                </span>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
+                                                                            {isLocked && (
+                                                                                <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                                                                                    <span className="bg-white/80 text-gray-800 text-[10px] font-bold px-2 py-1 rounded shadow-sm flex items-center gap-1">
+                                                                                        <span>🔒</span> สงวนสิทธิ์
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
                                                                 </div>
 
                                                                 {/* Set Result Button */}

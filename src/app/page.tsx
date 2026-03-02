@@ -82,8 +82,7 @@ export default function Home() {
                             {savedMatches.length} Active Signals
                         </div>
                     </div>
-
-                    <SavedMatchList matches={savedMatches} readOnly={true} layout="list" />
+                    <SavedMatchList matches={savedMatches} readOnly={true} layout="grid" hideConfidence={true} />
                 </div>
 
                 {/* Footer */}
